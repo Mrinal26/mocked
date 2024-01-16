@@ -1,0 +1,48 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Bro</title>
+</head>
+<body>
+    <h1>Login Here</h1>
+    <form id="logger">
+        <label for="email">Email</label>
+        <input type="text"
+            id="email"
+            required="true"
+        >
+        <label for="password">password</label>
+        <input type="password"
+            id="password"
+            required="true"
+        >
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('logger').addEventListener('submit', function(e){
+            e.preventDefault();
+
+            const email= document.getElementById('email').value;
+            const password= document.getElementById('password').value;
+
+            fetch('https://reqres.in/api/login' ,{
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({email, password}),
+
+            })
+            .then(resp => resp.json())
+            .then(data =>{
+                localStorage.setItem('token', data.token);
+
+                window.location.href= 'employee.html';
+            })
+            .catch(err => console.log(err));
+        });
+    </script>
+</body>
+</html>

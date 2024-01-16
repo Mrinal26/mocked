@@ -1,0 +1,142 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee</title>
+    <style>
+        .employeecard{
+            border: 1px solid black;
+            margin: 17px;
+            padding: 14px;
+            width: 200px;
+            display: inline-block;
+            background-color: aqua;
+        }
+
+        .employeecard img{
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+
+        .pagination{
+            margin-top: 30px;
+        }
+
+        .filteringu{
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Employee Page</h1>
+    <div id="employee">
+
+
+
+    </div>
+
+    <div id="filtering" class="filteringu">
+        <label for="department">Filter by Department</label>
+        <select id="department" onchange="handlefilter()">
+            <option value="all">All</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Operations">Operations</option>
+            <option value="Finance">Finance</option>
+            <option value="HR">HR</option>
+        </select>
+
+        <label for="gender">Filter by Gender</label>
+        <select id="gender" onchange="handlefilter()">
+            <option value="all">All</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+    </div>
+
+    <div id="pagination" class="pagination">
+        <button onclick="prev()">Pre</button>
+        <span id="currentpage">1</span>
+        <button onclick="nextpage()">Next</button>
+    </div>
+
+    <script>
+        const token= localStorage.getItem('token');
+        let currentpage=1;
+        let emp= 6;
+        let filteredata= [];
+
+        if(!token){
+            window.location.href= 'index.html';
+
+        }else{
+            fetch('https://dbioz2ek0e.execute-api.ap-south-1.amazonaws.com/mockapi/get-employees')
+            .then(resp => resp.json())
+            .then(data => {
+                filteredata= data.data;
+                displaydata();
+            })
+            .catch(err=> console.log(err));
+        }
+
+        function displaydata(){
+            const employeedata= document.getElementById('employee');
+            employeedata.innerHTML= '';
+
+            const si=(currentpage-1)*emp;
+            const end= si+ emp;
+
+            const empdisp=filteredata.slice(si, end);
+                
+                const cards= empdisp.map(employee => {
+                    const card= document.createElement('div');
+                    card.classList.add('employeecard');
+
+                    card.innerHTML= `<img src="${employee.image}" alt="img">
+                        <p>Name: ${employee.name} </p> 
+                        <p>Gender: ${employee.gender}</p>
+                        <p>Department: ${employee.department}</p>
+                        <p>Salary: ${employee.salary}</p>   
+                    `;
+
+                    return card;
+                });
+
+                employeedata.append(...cards);
+                document.getElementById('currentpage').textContent= currentpage;
+        }
+
+        function prev(){
+            if(currentpage > 1){
+                currentpage--;
+                displaydata();
+            }
+        }
+
+        function nextpage(){
+            const totalp= Math.ceil(filteredata.length/emp);
+            if(currentpage< totalp){
+                currentpage++;
+                displaydata();
+            }
+        }
+
+        function handlefilter(){
+            const selectedpt= document.getElementById('department').value;
+            const selectgender= document.getElementById('gender').value;
+
+            filteredata= data.data.filter(employee =>{
+                const dm= selectedpt === 'all' || employee.department === selectedpt;
+                const gendermatch= selectgender=== 'all' || employee.gender === selectgender;
+
+                return departmentmatch && gendermatch;
+            });
+
+            currentpage=1;
+            displaydata();
+        }
+    </script>
+</body>
+</html>
