@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -30,15 +31,11 @@
 </head>
 <body>
     <h1>Employee Page</h1>
-    <div id="employee">
-
-
-
-    </div>
+    <div id="employee"></div>
 
     <div id="filtering" class="filteringu">
         <label for="department">Filter by Department</label>
-        <select id="department" onchange="handlefilter()">
+        <select id="department" onchange=handlefilter()>
             <option value="all">All</option>
             <option value="Engineering">Engineering</option>
             <option value="Marketing">Marketing</option>
@@ -48,12 +45,16 @@
         </select>
 
         <label for="gender">Filter by Gender</label>
-        <select id="gender" onchange="handlefilter()">
+        <select id="gender" onchange=handlefilter()>
             <option value="all">All</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
         </select>
+    </div>
 
+    <div id="sorting">
+        <button onclick="sortingf('highToLow')">High to Low</button>
+        <button onclick="sortingf('lowToHigh')">Low to High</button>
     </div>
 
     <div id="pagination" class="pagination">
@@ -63,79 +64,95 @@
     </div>
 
     <script>
-        const token= localStorage.getItem('token');
-        let currentpage=1;
-        let emp= 6;
-        let filteredata= [];
+        const token = localStorage.getItem('token');
+        let currentpage = 1;
+        let emp = 6;
+        let filteredata = [];
 
-        if(!token){
-            window.location.href= 'index.html';
-
-        }else{
+        if (!token) {
+            window.location.href = 'index.html';
+        } else {
             fetch('https://dbioz2ek0e.execute-api.ap-south-1.amazonaws.com/mockapi/get-employees')
             .then(resp => resp.json())
             .then(data => {
-                filteredata= data.data;
+                filteredata = data.data;
                 displaydata();
             })
-            .catch(err=> console.log(err));
+            .catch(err => console.log(err));
         }
 
-        function displaydata(){
-            const employeedata= document.getElementById('employee');
-            employeedata.innerHTML= '';
+        function displaydata() {
+            const employeedata = document.getElementById('employee');
+            employeedata.innerHTML = '';
 
-            const si=(currentpage-1)*emp;
-            const end= si+ emp;
+            const si = (currentpage - 1) * emp;
+            const end = si + emp;
 
-            const empdisp=filteredata.slice(si, end);
+            const empdisp = filteredata.slice(si, end);
                 
-                const cards= empdisp.map(employee => {
-                    const card= document.createElement('div');
-                    card.classList.add('employeecard');
+            const cards = empdisp.map(employee => {
+                const card = document.createElement('div');
+                card.classList.add('employeecard');
 
-                    card.innerHTML= `<img src="${employee.image}" alt="img">
-                        <p>Name: ${employee.name} </p> 
-                        <p>Gender: ${employee.gender}</p>
-                        <p>Department: ${employee.department}</p>
-                        <p>Salary: ${employee.salary}</p>   
-                    `;
+                card.innerHTML = `<img src="${employee.image}" alt="img">
+                    <p>Name: ${employee.name} </p> 
+                    <p>Gender: ${employee.gender}</p>
+                    <p>Department: ${employee.department}</p>
+                    <p>Salary: ${employee.salary}</p>   
+                `;
 
-                    return card;
-                });
+                return card;
+            });
 
-                employeedata.append(...cards);
-                document.getElementById('currentpage').textContent= currentpage;
+            employeedata.append(...cards);
+            document.getElementById('currentpage').textContent = currentpage;
         }
 
-        function prev(){
-            if(currentpage > 1){
+        function prev() {
+            if (currentpage > 1) {
                 currentpage--;
                 displaydata();
             }
         }
 
-        function nextpage(){
-            const totalp= Math.ceil(filteredata.length/emp);
-            if(currentpage< totalp){
+        function nextpage() {
+            const totalp = Math.ceil(filteredata.length / emp);
+            if (currentpage < totalp) {
                 currentpage++;
                 displaydata();
             }
         }
 
-        function handlefilter(){
-            const selectedpt= document.getElementById('department').value;
-            const selectgender= document.getElementById('gender').value;
+        function sortingf(order) {
+            filteredata.sort((a, b) => {
+                const sa = parseFloat(a.salary);
+                const sb = parseFloat(b.salary);
 
-            filteredata= data.data.filter(employee =>{
-                const dm= selectedpt === 'all' || employee.department === selectedpt;
-                const gendermatch= selectgender=== 'all' || employee.gender === selectgender;
+                if (order === 'highToLow') {
+                    return sb - sa; 
+                } else if (order === 'lowToHigh') {
+                    return sa - sb; 
+                }
+            });
+
+            currentpage = 1;
+            displaydata();
+        }
+
+        function handlefilter() {
+            const selectedpt = document.getElementById('department').value;
+            const selectgender = document.getElementById('gender').value;
+
+            filteredata = data.data.filter(employee => {
+                const departmentmatch = selectedpt === 'all' || employee.department === selectedpt;
+                const gendermatch = selectgender === 'all' || employee.gender === selectgender;
 
                 return departmentmatch && gendermatch;
             });
 
-            currentpage=1;
+            currentpage = 1;
             displaydata();
+            sortingf('highToLow');
         }
     </script>
 </body>
